@@ -107,6 +107,3 @@
   url = {https://openreview.net/forum?id=hQ9V5QN27eS}
 }
 ```
-
-If there are any problems, or if you have a question, don't hesitate to open an issue here on GitHub.
->>>>>>> 317f308 (Hopper + HalfCheetah + Walker2d)
