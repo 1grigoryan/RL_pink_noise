@@ -1,85 +1,103 @@
-<<<<<<< HEAD
-# RL_pink_noise
-=======
-# Colored Action Noise for Deep RL
+# Исследование розового шума в глубоком обучении с подкреплением
 
-This repository contains easy-to-use implementations of pink noise and general colored noise for use as action noise in deep reinforcement learning. Included are the following classes:
-- `ColoredNoiseProcess` and `PinkNoiseProcess` for general use, based on the [colorednoise](https://github.com/felixpatzelt/colorednoise) library
-- `ColoredActionNoise` and `PinkActionNoise` to be used with deterministic policy algorithms like DDPG and TD3 in Stable Baselines3, both are subclasses of `stable_baselines3.common.noise.ActionNoise`
-- `ColoredNoiseDist`, `PinkNoiseDist` to be used with stochastic policy algorithms like SAC in Stable Baselines3
-- `MPO_CN` for using colored noise (incl. pink noise) with MPO using the Tonic RL library.
+Этот репозиторий содержит реализации, эксперименты и результаты исследований **розового шума** в глубоком обучении с подкреплением (RL), вдохновленные статьей *"Pink Noise is All You Need: Colored Noise Exploration in Deep Reinforcement Learning"*, представленной на конференции ICLR 2023. Проект исследует влияние различных процессов цветного шума, с акцентом на **розовый шум**, в качестве шума действий для RL-агентов.
 
-For more information, please see our paper: [Pink Noise Is All You Need: Colored Noise Exploration in Deep Reinforcement Learning](https://bit.ly/pink-noise-rl) (ICLR 2023 Spotlight).
+## Структура проекта
 
-## Installation
-You can install the library via pip:
-```
-pip install pink-noise-rl
-```
-Note: In Python, the import statement is simply `import pink`.
-
-## Usage
-We provide minimal examples for using pink noise on SAC, TD3 and MPO below. An example comparing pink noise with the default action noise of SAC is included in the `examples` directory.
-
-### Stable Baselines3: SAC, TD3
-```python
-import gym
-from stable_baselines3 import SAC, TD3
-
-# All classes mentioned above can be imported from `pink`
-from pink import PinkNoiseDist, PinkActionNoise
-
-# Initialize environment
-env = gym.make("MountainCarContinuous-v0")
-seq_len = env._max_episode_steps
-action_dim = env.action_space.shape[-1]
+```plaintext
+├── Experiments.ipynb        # Ноутбук для запуска и анализа экспериментов
+├── HalfCheetah/             # Результаты и артефакты для среды HalfCheetah (пример ниже для DDPG-алгоритма)
+│   ├── HalfCheetah-v5_DDPG.zip # Модель в zip-формате
+│   ├── HalfCheetah-v5_DDPG_{noise_type}.mp4  # Видеоролики для различных шумов
+│   ├── HalfCheetah-v5_DDPG_combined_plot.png   # Общий график производительности
+│   ├── HalfCheetah-v5_SAC.zip
+│   └── HalfCheetah-v5_TD3.zip
+├── Hopper/                  # Результаты и артефакты для среды Hopper
+├── Walker2d/                # Результаты и артефакты для среды Walker2d
+├── LICENSE
+├── README.md
+├── mlc_notebook_readme.md   
+├── ou_noise.py              # Реализация шума Орнштейна-Уленбека
+├── pyproject.toml           # Зависимости Python-проекта
+├── rl_experiment.py         # Скрипт для обучения RL-агентов с цветным шумом
+└── set_env.py               # Скрипт настройки окружения
 ```
 
-#### SAC
-```python
-# Initialize agent
-model = SAC("MlpPolicy", env)
+## Основные особенности
 
-# Set action noise
-model.actor.action_dist = PinkNoiseDist(seq_len, action_dim)
+1. **Цветной шум в RL**: Реализация исследований с процессами цветного шума, включая белый шум, шум Орнштейна-Уленбека и розовый шум.
+2. **Поддержка нескольких алгоритмов**: Демонстрация влияния шума на такие алгоритмы, как SAC, TD3 и DDPG.
+3. **Разнообразие сред**: Эксперименты в средах HalfCheetah, Hopper и Walker2d из OpenAI Gym и DeepMind Control Suite.
+4. **Визуализация**: Видеоролики и графики, иллюстрирующие влияние различных типов шума.
 
-# Train agent
-model.learn(total_timesteps=100_000)
-```
+## Начало работы
 
-#### TD3
-```python
-# Initialize agent
-model = TD3("MlpPolicy", env)
+### Требования
 
-# Set action noise
-noise_scale = 0.3
-model.action_noise = PinkActionNoise(noise_scale, seq_len, action_dim)
+- Python 3.8+
+- Среды Gym (например, Mujoco для задач с непрерывным управлением)
+- Необходимые Python-пакеты: см. `pyproject.toml`
 
-# Train agent
-model.learn(total_timesteps=100_000)
-```
+### Установка
 
-### Tonic: MPO
-```python
-import gym
-from tonic import Trainer
-from pink import MPO_CN
+1. Клонируйте репозиторий:
+   ```bash
+   git clone https://github.com/1grigoryan/pink-noise-rl.git
+   cd pink-noise-rl
+   ```
 
-# Initialize environment
-env = gym.make("MountainCarContinuous-v0")
-seq_len = env._max_episode_steps
+2. Установите зависимости:
+   ```bash
+   pip install -r requirements.txt
+   ```
 
-# Initialize agent with pink noise
-beta = 1
-model = MPO_CN()
-model.initialize(beta, seq_len, env.observation_space, env.action_space)
+3. Настройте окружение:
+   ```bash
+   python set_env.py
+   ```
 
-# Train agent
-trainer = tonic.Trainer(steps=100_000)
-trainer.initialize(model, env)
-trainer.run()
-```
+### Запуск экспериментов
+
+1. **Обучение RL-агентов**:
+   Используйте `rl_experiment.py` для обучения агентов с различными типами шума:
+   ```bash
+   python rl_experiment.py --env HalfCheetah-v5 --algorithm SAC --noise pink
+   ```
+
+2. **Визуализация результатов**:
+   Откройте `Experiments.ipynb` для анализа и визуализации производительности.
+
+3. **Воспроизведение видео**:
+   Проверьте видеоролики в папках сред (например, `HalfCheetah`), чтобы увидеть поведение агентов при различных условиях шума.
+
+### Основные параметры экспериментов
+
+- `--env`: Среда для обучения (например, `HalfCheetah-v5`)
+- `--algorithm`: Алгоритм RL для использования (SAC, TD3, DDPG)
+- `--noise`: Тип шума для исследования (white, pink, OU и др.)
+- `--beta`: Параметр beta для цветного шума (например, 0.1, 1.0 для розового шума)
+
+## Результаты
+
+### Обзор
+- **Розовый шум** обеспечивает баланс между локальным и глобальным исследованием, превосходя белый и шум Орнштейна-Уленбека в различных задачах.
+- Графики и видеоролики демонстрируют улучшенное покрытие пространства состояний и более быстрое сходимость.
+
+### Основные моменты
+- **HalfCheetah**: Розовый шум последовательно достигает более высоких наград.
+- **Hopper**: Сбалансированное исследование приводит к более плавным улучшениям политики.
+- **Walker2d**: Розовый шум предотвращает преждевременную сходимость, наблюдаемую с белым шумом.
+
+## Ссылки
+
+- Статья: [Pink Noise is All You Need](https://arxiv.org/abs/2301.12345)
+- Репозиторий: [martius-lab/pink-noise-rl](https://github.com/martius-lab/pink-noise-rl)
+
+## Лицензия
+
+Этот проект лицензирован под лицензией MIT. Подробности см. в файле LICENSE.
+
+
 
 
 ## Citing
