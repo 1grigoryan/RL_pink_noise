@@ -95,8 +95,8 @@
 
 
 
-## Citing
-If you use this code in your research, please cite our paper:
+## Не забываем про тех, кто реализовал цветной шум
+Сделано на основе следующей работы:
 ```bibtex
 @inproceedings{eberhard-2023-pink,
   title = {Pink Noise Is All You Need: Colored Noise Exploration in Deep Reinforcement Learning},
